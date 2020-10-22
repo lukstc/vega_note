@@ -1,0 +1,100 @@
+
+data:
+================================================================================
+{
+  "description":"IMDB250",
+  "width": 500,
+  "height":500,
+  "padding":5,
+
+  "data":[
+    {
+      "name":"imdb",
+      "url":"https://raw.githubusercontent.com/ihoverlord/imdb_top_250/master/IMDB_TOP_250_MOVIES.json",
+      "transform":[{ "type": "filter", "expr": "datum.Rating > 8.8" }]
+    }
+  ],
+
+  "scales":[
+    {
+      "name":"xx",
+      "type":"band",
+      "domain":{"data":"imdb","field":"Title"},
+      "range":"width",
+      "padding":0.05
+    },
+    {
+      "name":"yy",
+      "type":"linear",
+      "domain":{"data":"imdb","field":"Rating"},
+      "domainMin":8.7,
+      "domainMax":9.3,
+      "range":"height"
+    }
+  ],
+
+  "axes":[
+    {
+      "orient": "bottom",
+      "scale": "xx",
+      "labelAlign":"right",
+      "labelAngle":-45
+    },
+    {
+      "orient": "left",
+      "scale": "yy"
+    }
+  ],
+
+  "signals": [
+    {
+      "name": "tooltip",
+      "value": {},
+      "on": [
+        {"events": "rect:mouseover", "update": "datum"},
+        {"events": "rect:mouseout",  "update": "{}"}
+      ]
+    }
+  ],
+
+  "marks":[
+    {
+      "type":"rect",
+      "from":{"data":"imdb"},
+      "encode":{
+        "enter":{
+          "x": {"scale": "xx", "field": "Title"},
+          "width": {"scale": "xx", "band": 0.6},
+          "y": {"scale": "yy", "field": "Rating"},
+          "y2": {"scale": "yy", "value": 8.7}
+        },
+        "update":{
+          "fill":{"value":"steelblue"}
+        },
+        "hover": {
+          "fill": {"value": "red"}
+        }
+      }
+    },
+    {
+      "type":"text",
+      "from":{"data":"imdb"},
+      "encode":{
+        "enter":{
+          "align": {"value": "center"},
+          "baseline": {"value": "bottom"},
+          "fill": {"value": "#333"}
+        },
+        "update":{
+          "x": {"scale": "xx", "signal": "tooltip.Title", "band": 0.6,"offset": -20},
+          "y": {"scale": "yy", "signal": "tooltip.Rating", "offset": -2},
+          "text": {"signal": "tooltip.Rating"},
+          "fillOpacity": [
+            {"test": "datum === tooltip", "value": 0},
+            {"value": 1}
+          ]
+        }
+      }
+    }
+  ]
+}
