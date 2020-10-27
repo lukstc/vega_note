@@ -46,6 +46,7 @@
 
 - Domain: 匹配数据和viz量度【一般来自于data数据】
 - 需要注意：如果想改变axes显示数据范围，是在Axes中修改
+- ```domainMax，domainMin```只能接```Number```
 
 
 
@@ -55,7 +56,7 @@
 - 
 
 ## Layout
-- **columns**: 设置视图的col数量（假如有两个图，如何摆放，竖着横着）如果不specify，或者为0，则默认为无限的col
+- **columns**: 设置视图的col数量（假如有两个图，如何摆放，竖着横着）如果不specify，或者为0，则默认为无限的co[pending]l
 
 
 
@@ -75,27 +76,35 @@
 - Transform - Sequence
   - "as" -默认“data”
   - "stop" is exclusive
-
-
+- ```transform```很多用法可能和python实现理念不一样，注意参考doc
+- ```aggregate```直接得出处理后的结果，产生新数据
+- ```joinaggreage```处理产生新数据后会append到原始数据
 
 ## Memo & Tips
 
 - 注意拼写signal
 - 注意数据内部命名与拼写
 - transform对数据的操作，也是层层叠加上去的的，参考[Pi Monte Carlo](https://vega.github.io/vega/examples/pi-monte-carlo/)对数据的transform过程
-- 修改数据显示范围```{7,8,9}```做柱状图，显示Y轴[6,10]:
-  - 修改scale domain Min 为 6
-  - 修改mark y2 为6
-  - 【应该有更标准高效的办法，pending研究】
-
-
-
-## 问题和疑问
-
+- 修改数据显示范围```{7,8,9}```做柱状图，显示Y轴[6,10]【轴的显示范围略大于数值范围】【显示效果参考笔记Modified Bar Chart】:
+  - 笨办法【hard coding】
+    - 修改scale domain Min 为 6
+    - 修改mark y2【柱状图底部的位置】 为6
+  - 新办法【transform提前处理好数据】【以IMDB rating为例，参考笔记Modified Bar Chart】
+    - Step#1-数据处理transform```joinaggreage```【根据需求agg之后（min & max）并到原有数据上面Rate_min,Rate_max】
+    - Step#2-数据处理transform```formula```【```min * 0.99``` & ```max * 1.01```并到原有数据上面,R_low,R_high】
+    - Step#3-Scale-【Multi-Field Data References】```"fields":["R_low","R_high"]```
+    - Step#4-Mark选取新的low值-```"y2": {"scale": "yy","field": "R_low"}```
+    - Note: 新方法不需要hard coding，不过需要考虑，在对min和max处理之后，处理的值是否在合理范围内【Pending Review】
+- 处理数type：data-format-parameter-parse【参考个人笔记Bar Chart data部分】
+- 注意能接收的参数的类型：[官方doc参考](https://vega.github.io/vega/docs/types/#Value)
 - [Pi Monte Carlo](https://vega.github.io/vega/examples/pi-monte-carlo/)
-  - #285 - map scale时候x map到height，需要reverse：true？【个人理解：绘制Axes时候，height上面的量度转投到横轴上时，是从大到小的，所以需要在scale时候reverse？】
+  - #285 - map scale时候x map到height，需要reverse：true【个人理解：绘制Axes时候，height上面的量度转投到横轴上时，是从大到小的，所以需要在scale时候reverse？】
   - #78&93&174 ```"width": {"signal": "height"},``` signal由event或者变量驱动interactive，height此处应为固定值，为何如此设置，？
     - 如果改成```"width": "height"``无法正常显示。UI提示需要array或者object，doc中写width take number
     - 【改成"width": {"value":380}可以正常显示】
-  - Bind的插件？位置可以控制吗
+    - 【Solved】```signal```传递的是一个变量，不一定是和交互相关的
+  - Bind的插件？【Solved】不可以设定控制组件的样式，这部分需要通过前端JS实现
   - #229 ```"text": {"signal": "'Estimate: ' + format(datum.estimate, ',.3f')"}``` 【如何理解此处的signal？】
+    - 【Solved】【传递的是可变参数】
+
+## 问题和疑问

@@ -3,16 +3,25 @@
   "width": 500,
   "height": 500,
   "padding": 5,
+
   "data": [
     {
       "name": "imdb",
       "url": "https://raw.githubusercontent.com/ihoverlord/imdb_top_250/master/IMDB_TOP_250_MOVIES.json",
       "transform": [
+        {"type": "filter","expr": "datum.Rating > 8.7"},
         {
-          "type": "filter",
-          "expr": "datum.Rating > 8.8"
-        }
-      ]
+          "type": "joinaggregate",
+          "fields": ["Rating","Rating"],
+          "ops": ["min","max"],
+          "as": ["R_min","R_max"]
+        },
+        { "type": "formula", "as": "R_low", "expr": "datum.R_min * 0.99" },
+        { "type": "formula", "as": "R_high", "expr": "datum.R_max * 1.01" }
+      ],
+      "format":{
+        "parse": {"Rating":"number"}
+      }
     }
   ],
   "scales": [
@@ -31,10 +40,9 @@
       "type": "linear",
       "domain": {
         "data": "imdb",
-        "field": "Rating"
+        "fields": ["Rating","R_low","R_high"]
       },
-      "domainMin": 8.7,
-      "domainMax": 9.3,
+      "zero":false,
       "range": "height"
     }
   ],
@@ -70,7 +78,7 @@
     {
       "type": "rect",
       "from": {
-        "data": "imdb"
+        "data":"imdb"
       },
       "encode": {
         "enter": {
@@ -88,7 +96,7 @@
           },
           "y2": {
             "scale": "yy",
-            "value": 8.7
+            "field": "R_low"
           }
         },
         "update": {
