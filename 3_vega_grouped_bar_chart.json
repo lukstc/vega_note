@@ -1,0 +1,130 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "Grouped Bar Chart",
+  "title":"Grouped Bar Chart",
+  "width": 500,
+  "height": 300,
+  "padding": 5,
+  "autosize": "fit",
+
+  "data":[
+    {
+      "name":"the_score",
+      "values":[
+        {"category":"A", "position":0, "score":"0.1"},
+        {"category":"A", "position":1, "score":"0.6"},
+        {"category":"A", "position":2, "score":"0.9"},
+        {"category":"A", "position":3, "score":"0.4"},
+        {"category":"B", "position":0, "score":"0.7"},
+        {"category":"B", "position":1, "score":"0.2"},
+        {"category":"B", "position":2, "score":"1.1"},
+        {"category":"B", "position":3, "score":"0.8"},
+        {"category":"C", "position":0, "score":"0.6"},
+        {"category":"C", "position":1, "score":"0.1"},
+        {"category":"C", "position":2, "score":"0.2"},
+        {"category":"C", "position":3, "score":"0.7"}
+      ],
+      "format":{
+        "type":"json",
+        "parse":{"score":"number"}
+      }
+    }
+  ],
+
+  "scales": [
+    {
+      "name":"xx",
+      "type":"band",
+      "domain":{"data": "the_score","field":"category"},
+      "range":"width",
+      "padding":0.5
+    },
+    {
+      "name":"yy",
+      "type":"linear",
+      "domain":{"data": "the_score","field":"score"},
+      "range":"height",
+      "zero":true,
+      "nice":true,
+      "round":true
+    },
+    {
+      "name":"color",
+      "type":"ordinal",
+      "domain":{"data":"the_score","field":"position"},
+      "range":{"scheme":"lightorange"}
+    }
+  ],
+  
+  "axes": [
+    {"orient":"left","scale": "yy"},
+    {"orient":"bottom","scale": "xx"}
+  ],
+
+  "marks": [
+    {
+      "type":"group",
+      "from":{
+        "facet":{
+          "data":"the_score",
+          "name":"facet",
+          "groupby":"category"
+        }
+      },
+
+      "encode": {
+        "enter":{
+          "x":{"scale":"xx","field":"category"}
+        }
+      },
+
+      "signals": [
+        {"name":"width","update":"bandwidth('xx')"}
+      ],
+
+      "scales": [
+        {
+          "name":"pos",
+          "type":"band",
+          "range":"width",
+          "domain":{"data": "facet","field":"position"}
+        }
+      ],
+
+      "marks": [
+        {
+          "name":"my_bars",
+          "from":{"data":"facet"},
+          "type":"rect",
+          "encode":{
+            "enter":{
+              "x":{"scale":"pos","field":"position"},
+              "width":{"scale":"pos","band":1},
+              "y":{"scale":"yy","field":"score"},
+              "y2":{"scale":"yy","value":0},
+              "fill":{"scale":"color","field":"position"}
+            }
+          }
+        },
+
+        {
+          "type": "text",
+          "from":{"data":"my_bars"},
+          "encode":{
+            "enter":{
+              "y":{"field":"y","offset":15},
+              "x":{"field":"x","offset":0},
+              "fill":[
+                {"test": "contrast('white', datum.fill) > contrast('black', datum.fill)", "value": "white"},
+                {"value":"black"}
+              ],
+              "text":{"field":"datum.score"}
+            }
+          }
+        }
+      ]
+
+    }
+  ]
+
+}

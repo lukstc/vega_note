@@ -41,12 +41,29 @@
 - **Text**
   - y设置y轴位置
   - ```dy``` 设置offset
+- ```from``` take type **From**, [doc参考](https://vega.github.io/vega/docs/marks/#from)
+  
+- data - string
+	- facet - Facet - 只可用于group mark声明，用来partition数据across multiple marks
+	  - ```facet```[faceting Doc](https://vega.github.io/vega/docs/marks/#faceting) 用来定义和分割多组（group）marks的data，只有**group mark**的定义中可以使用这
+	    - facet【方面，特点】可以参考翻译理解其作用和含义
+	    - name - string - Required 【新生facet】
+	    - data - string - Required【数据来源】
+	    - field - Field - 【如果是pre-facet的data，Required】
+	    - groupby - Field | Field [] - 【如果是data-driven facets，Required】指定用哪一个字段来分割数据
+	    - aggregate - Object -【for data-driven facets, 声明对每一个facet的aggregate方法】
+	
+	### Group的使用
+	- 核心概念是将可视化中不同的元素组成一个集合，方便对整体进行管理分配
 
 ## Scale
 
 - Domain: 匹配数据和viz量度【一般来自于data数据】
 - 需要注意：如果想改变axes显示数据范围，是在Axes中修改
 - ```domainMax，domainMin```只能接```Number```
+- ```range```:
+  - e.g. ```"range":{"scheme":"blueorange"}```
+  - 可以使用设定好的颜色，也可以自定义新的scheme
 
 
 
@@ -56,19 +73,25 @@
 - 
 
 ## Layout
-- **columns**: 设置视图的col数量（假如有两个图，如何摆放，竖着横着）如果不specify，或者为0，则默认为无限的co[pending]l
-
-
-
-## Group的使用
-
-- 核心概念是将可视化中不同的元素组成一个集合，方便
+- **columns**: 设置视图的col数量（假如有两个图，如何摆放，竖着横着）如果不specify，或者为0，则默认为无限的col
+- e.g 如果有3个group mark，columns=3，则形成row-1*col-3，
+- e.g 如果有3个group mark，columns=4，则形成row-2*col-2，fill前3个position
+- group marks的在代码里的相对位置，决定了fill出现在viz里的顺序
 
 
 
 ## Data
 
 - 没有key命名的data例如```[1,2,3]```会自动生成key/col name： ***data***
+
+- Format:
+
+  - format 除了可以用来声明函数格式，也可以用来改变data type
+
+  - ```JSON
+    "format":{"type":"json","parse":{"value":"number"}}
+    ```
+
 
 ## Transform
 
@@ -94,7 +117,7 @@
     - Step#2-数据处理transform```formula```【```min * 0.99``` & ```max * 1.01```并到原有数据上面,R_low,R_high】
     - Step#3-Scale-【Multi-Field Data References】```"fields":["R_low","R_high"]```
     - Step#4-Mark选取新的low值-```"y2": {"scale": "yy","field": "R_low"}```
-    - Note: 新方法不需要hard coding，不过需要考虑，在对min和max处理之后，处理的值是否在合理范围内【Pending Review】
+    - Note: 新方法不需要hard coding，不过需要考虑：在对min和max处理之后，处理的值是否在合理范围内【Pending Review】
 - 处理数type：data-format-parameter-parse【参考个人笔记Bar Chart data部分】
 - 注意能接收的参数的类型：[官方doc参考](https://vega.github.io/vega/docs/types/#Value)
 - [Pi Monte Carlo](https://vega.github.io/vega/examples/pi-monte-carlo/)
@@ -106,5 +129,100 @@
   - Bind的插件？【Solved】不可以设定控制组件的样式，这部分需要通过前端JS实现
   - #229 ```"text": {"signal": "'Estimate: ' + format(datum.estimate, ',.3f')"}``` 【如何理解此处的signal？】
     - 【Solved】【传递的是可变参数】
+- 
 
 ## 问题和疑问
+
+- "$schema": 似乎没有什么实际作用，删除后似乎对viz显示没有什么影响？
+
+- ```json
+  "type":"group",
+        "from":{
+          "facet":{
+            "data":"the_score",
+            "name":"facet",
+            "groupby":"category"
+          }
+        }
+  ```
+
+- 对facet的理解：用于在多个group marks中分割数据【并且分配按照group by之后的数据，分配给各个mark】？
+
+- field - Field - 【如果是pre-facet的data，Required】【改进grouped bar chart的图，使用pre-facet的data】【pending task】
+
+- [Grouped Bar Chart](https://vega.github.io/vega/examples/grouped-bar-chart/) 中
+
+  - #76
+
+    - ```JSON
+      "signals": [{"name": "height", "update": "bandwidth('yscale')"}],
+      "scales": [
+              {
+                "name": "pos",
+                "type": "band",
+                "range": "height",
+                "domain": {"data": "facet", "field": "position"}
+              }
+            ],
+      ```
+
+    - 此处的作用？
+
+    - 个人理解是：
+
+      - 此处bandwidth('yscale')返回的值是height的scale上的band宽度
+
+      - **bandwidth**(*name*[, *group*]): Returns the current band width for the named band scale transform, or zero if the scale is not found or is not a band scale. The optional *group* argument takes a scenegraph group mark item to indicate the specific scope in which to look up the scale.
+
+      - 重新赋值给height <== 宽度 
+
+      - 此处scale是定义group内sub mark的scale，在scale
+
+      - 更新的是group内部每个子mark内部的scale？
+
+      - 实验
+
+      - ```json
+        # original height = 240
+        # height for each group ~ 80 = 240/3
+        # 以下结果可以验证上述理解 hard coding height2 value
+        "signals": [
+                {"name": "height", "update": "bandwidth('yscale')"},
+                {"name": "height2", "value": [1,80]}
+              ],
+        
+              "scales": [
+                {
+                  "name": "pos",
+                  "type": "band",
+                  "range": {"signal":"height2"},
+                  "domain": {"data": "facet", "field": "position"}
+                }
+              ],
+        ```
+
+  - #105
+
+    - ```json
+      {
+        "type": "text",
+        "from": {"data": "bars"},
+        "encode": {
+          "enter": {
+            "x": {"field": "x2", "offset": -5},
+            "y": {"field": "y", "offset": {"field": "height", "mult": 0.5}},
+            "fill": [
+              {"test": "contrast('white', datum.fill) > contrast('black', datum.fill)", "value": "white"},
+              {"value": "black"}
+            ],
+            "align": {"value": "right"},
+            "baseline": {"value": "middle"},
+            "text": {"field": "datum.value"}
+          }
+        }
+      }
+      ```
+
+    - 为啥from data bars
+
+    - 为啥x field 用x2
