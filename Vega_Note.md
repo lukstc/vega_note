@@ -170,7 +170,7 @@
 
     - 个人理解是：
 
-      - 此处bandwidth('yscale')返回的值是height的scale上的band宽度
+      - 此处bandwidth('yscale')返回的值是height的scale上的band宽度【group下每个sub-mark的bandwidth】
 
       - **bandwidth**(*name*[, *group*]): Returns the current band width for the named band scale transform, or zero if the scale is not found or is not a band scale. The optional *group* argument takes a scenegraph group mark item to indicate the specific scope in which to look up the scale.
 
@@ -226,3 +226,8 @@
     - 为啥from data bars
 
     - 为啥x field 用x2
+
+- [Line Chart]()
+
+  - modified chart: [Error c is not a function]
+    - catnull-rom
