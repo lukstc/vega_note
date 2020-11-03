@@ -2,7 +2,7 @@
 
 ## List of Content
 
-- [Specification-全局声明](##Specification)	Overview of a full Vega specification, including sizing and metadata. 
+- [Specification-全局声明](##Specification)	Overview of a full Vega specification, including sizing and metadata.
 - Config-默认视图设置	Configure defaults for visual encoding choices.
 - Data-数据以及数据处理	Define, load, and parse data to visualize.
 - Transforms-数据变形处理过滤分组	Apply data transforms (filter, sort, aggregate, layout) prior to visualization.
@@ -42,7 +42,7 @@
   - y设置y轴位置
   - ```dy``` 设置offset
 - ```from``` take type **From**, [doc参考](https://vega.github.io/vega/docs/marks/#from)
-  
+
 - data - string
 	- facet - Facet - 只可用于group mark声明，用来partition数据across multiple marks
 	  - ```facet```[faceting Doc](https://vega.github.io/vega/docs/marks/#faceting) 用来定义和分割多组（group）marks的data，只有**group mark**的定义中可以使用这
@@ -52,7 +52,7 @@
 	    - field - Field - 【如果是pre-facet的data，Required】
 	    - groupby - Field | Field [] - 【如果是data-driven facets，Required】指定用哪一个字段来分割数据
 	    - aggregate - Object -【for data-driven facets, 声明对每一个facet的aggregate方法】
-	
+
 	### Group的使用
 	- 核心概念是将可视化中不同的元素组成一个集合，方便对整体进行管理分配
 
@@ -70,7 +70,7 @@
 ## Axes
 
 - values: array显示设置axes上显示的数据量度
-- 
+-
 
 ## Layout
 - **columns**: 设置视图的col数量（假如有两个图，如何摆放，竖着横着）如果不specify，或者为0，则默认为无限的col
@@ -102,6 +102,14 @@
 - ```transform```很多用法可能和python实现理念不一样，注意参考doc
 - ```aggregate```直接得出处理后的结果，产生新数据
 - ```joinaggreage```处理产生新数据后会append到原始数据
+### Layout Transform
+- ```Pie```计算并转换data数字为角度数据用于pie或者是donut chart绘制
+  - 参数
+    - ```field```	Field： data中用于计算角度的数据field
+    - ```startAngle```	Number 绘图的起始角度(default 0，正上方。north).
+    - ```endAngle```	Number	绘图的结束角度(default 2 * PI).
+    - ```sort``` Boolean	根据角度来排序If true, sorts the arcs according to field values (default false).
+    - ```as```	String[ ]	The output fields for the computed start and end angles for each arc. The default is ["startAngle", "endAngle"]用来改名字的
 
 ## Memo & Tips
 
@@ -129,7 +137,7 @@
   - Bind的插件？【Solved】不可以设定控制组件的样式，这部分需要通过前端JS实现
   - #229 ```"text": {"signal": "'Estimate: ' + format(datum.estimate, ',.3f')"}``` 【如何理解此处的signal？】
     - 【Solved】【传递的是可变参数】
-- 
+-
 
 ## 问题和疑问
 
@@ -174,7 +182,7 @@
 
       - **bandwidth**(*name*[, *group*]): Returns the current band width for the named band scale transform, or zero if the scale is not found or is not a band scale. The optional *group* argument takes a scenegraph group mark item to indicate the specific scope in which to look up the scale.
 
-      - 重新赋值给height <== 宽度 
+      - 重新赋值给height <== 宽度
 
       - 此处scale是定义group内sub mark的scale，在scale
 
@@ -190,7 +198,7 @@
                 {"name": "height", "update": "bandwidth('yscale')"},
                 {"name": "height2", "value": [1,80]}
               ],
-        
+
               "scales": [
                 {
                   "name": "pos",
