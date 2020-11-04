@@ -1,0 +1,686 @@
+{
+  "autosize": "pad",
+  "padding": 5,
+  "height": 400,
+  "data": [
+    {
+      "name": "table",
+      "values": data0,
+      "transform": [
+        {
+          "type": "pie",
+          "field": "FTE",
+          "startAngle": 6.29,
+          "endAngle": 0,
+          "sort": true
+        }
+      ],
+      "format": {"parse": {"FTE": "number","PERCENTAGE": "number"}}
+    },
+    {
+      "name": "table2_temp",
+      "values": data1,
+      "transform": [{"type": "formula","as": "project","expr": "datum.PROJECT_DESC_FINAL"}],
+      "format": {"parse": {"FTE": "number"}}
+    },
+    {
+      "name": "table2",
+      "source": "table2_temp",
+      "transform": [
+        {
+      "type": "window",
+      "sort": {
+        "field": "FTE",
+        "order": "descending"
+      },
+      "ops": [
+        "rank"
+      ],
+      "as": [
+        "rank"
+      ]
+    },{
+      "type": "formula",
+      "as": "Category",
+      "expr": "datum.rank < k+1 ? datum.project : 'Other R&D projects'"
+    },
+    {
+      "type": "aggregate",
+      "groupby": [
+        "Category",
+        "TOTAL_FTE"
+      ],
+      "ops": [
+        "sum",
+        "sum"
+      ],
+      "fields": [
+        "FTE",
+        "PERCENTAGE"
+      ],
+      "as": [
+        "total",
+        "percent"
+      ]
+    },
+    {
+      "type": "formula",
+      "as": "percent",
+      "expr": "datum.total/datum.TOTAL_FTE"
+    },
+    {
+      "type": "pie",
+      "field": "total",
+      "startAngle": 3.14,
+      "endAngle": -3.14,
+      "sort": true
+    }
+  ]
+}],
+"signals": [
+{
+    "name": "width",
+    "update": "(containerSize()[0])/2",
+    "on": [{
+        "events": {"source": "#toggle-bnt", "type": "click"},
+        "update": "(containerSize()[0])/2"
+    },
+        {
+        "events": {"source": "window", "type": "resize"},
+        "update": "(containerSize()[0])/2"
+        }]
+},
+{
+  "name": "tooltip",
+  "value": {},
+  "on": [
+    {
+      "events": "arc:mouseover",
+      "update": "datum"
+    },
+    {
+      "events": "arc:mouseout",
+      "update": "{}"
+    }
+  ]
+},
+{
+  "name": "k",
+  "value": 5,
+  "bind": {
+    "input": "range",
+    "min": 5,
+    "max": 10,
+    "step": 1
+  }
+}
+],
+"layout": {
+"padding": 10,
+"offset": 20,
+"bounds": "full",
+"align": "all"
+},
+"marks": [
+{
+  "type": "rule",
+  "encode": {
+    "enter": {
+      "x": {
+        "signal": "width/2"
+      },
+      "x2": {
+        "signal": "width*3/2-20"
+      },
+      "y": {
+        "signal": "height/2"
+      },
+      "y2": {
+        "signal": "70"
+      },
+      "strokeWidth": {
+        "value": 3
+      },
+      "stroke": {
+        "value": "#bdbdbd"
+      },
+      "strokeDash": {
+        "value": [
+          5,
+          3
+        ]
+      }
+    }
+  }
+},
+{
+  "type": "rule",
+  "encode": {
+    "enter": {
+      "x": {
+        "signal": "width/2"
+      },
+      "x2": {
+        "signal": "width*3/2-20"
+      },
+      "y": {
+        "signal": "height/2"
+      },
+      "y2": {
+        "signal": "height-70"
+      },
+      "strokeWidth": {
+        "value": 3
+      },
+      "stroke": {
+        "value": "#bdbdbd"
+      },
+      "strokeDash": {
+        "value": [
+          5,
+          3
+        ]
+      }
+    }
+  }
+},
+{
+  "type": "group",
+  "title": {
+    "text": "Internal FTEs ditribution in Sub.Transversal",
+    "frame": "group"
+  },
+  "encode": {
+    "update": {
+      "width": {
+        "signal": "width"
+      },
+      "height": {
+        "signal": "height"
+      }
+    }
+  },
+  "scales": [
+    {
+      "name": "color",
+      "type": "ordinal",
+      "domain": {
+        "data": "table",
+        "field": "RD_TRANSVERSAL",
+        "sort": {
+          "op": "mean",
+          "field": "FTE",
+          "order": "descending"
+        }
+      },
+      "range": [
+        "#0c084c",
+        "#096386",
+        "#00b7a8"
+      ]
+    },
+    {
+      "name": "pic1_scale1",
+      "type": "sqrt",
+      "domain": {
+        "data": "table",
+        "field": "FTE"
+      },
+      "zero": true,
+      "range": [
+        -2,
+        2
+      ]
+    },
+    {
+      "name": "pic1_scale2",
+      "type": "sqrt",
+      "domain": {
+        "data": "table",
+        "field": "FTE"
+      },
+      "zero": true,
+      "range": [
+        60,
+        2
+      ]
+    }
+  ],
+  "marks": [
+    {
+      "type": "arc",
+      "from": {
+        "data": "table"
+      },
+      "encode": {
+        "enter": {
+          "tooltip": {
+            "signal": "{title:datum.RD_TRANSVERSAL,'Count':format(datum.FTE,'.0f')}"
+          },
+          "fill": {
+            "scale": "color",
+            "field": "RD_TRANSVERSAL"
+          }
+        },
+        "update": {
+          "x": {
+            "field": {
+              "group": "width"
+            },
+            "mult": 0.5
+          },
+          "y": {
+            "field": {
+              "group": "height"
+            },
+            "mult": 0.5
+          },
+          "startAngle": {
+            "field": "startAngle"
+          },
+          "endAngle": {
+            "field": "endAngle"
+          },
+          "innerRadius": {
+            "value": 140
+          },
+          "fillOpacity": {
+            "value": 1
+          },
+          "padAngle": {
+            "value": 0
+          }
+        },
+        "hover": {
+          "padAngle": {
+            "value": 0.04
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {
+        "data": "table"
+      },
+      "encode": {
+        "update": {
+          "x": {
+            "field": {
+              "group": "width"
+            },
+            "mult": 0.5
+          },
+          "y": {
+            "field": {
+              "group": "height"
+            },
+            "mult": 0.5
+          },
+          "radius": {
+            "scale": "pic1_scale2",
+            "field": "FTE",
+            "offset": 80
+          },
+          "theta": {
+            "signal": "(datum.startAngle + datum.endAngle)/2"
+          },
+          "fill": {
+            "value": "#FFFFFF"
+          },
+          "align": {
+            "value": "center"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "fontSize": {
+            "value": 12
+          },
+          "text": {
+            "signal": "format(datum.FTE,'.0f')"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {
+        "data": "table"
+      },
+      "encode": {
+        "update": {
+          "x": {
+            "field": {
+              "group": "width"
+            },
+            "mult": 0.50
+          },
+          "y": {
+            "field": {
+              "group": "height"
+            },
+            "mult": 0.55
+          },
+          "radius": {
+            "scale": "pic1_scale2",
+            "field": "FTE",
+            "offset": 80
+          },
+          "theta": {
+            "signal": "(datum.startAngle + datum.endAngle)/2"
+          },
+          "fill": {
+            "value": "#FFFFFF"
+          },
+          "align": {
+            "value": "center"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "fontSize": {
+            "value": 12
+          },
+          "text": {
+            "value": "FTE"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {
+        "data": "table"
+      },
+      "encode": {
+        "update": {
+          "x": {
+            "field": {
+              "group": "width"
+            },
+            "mult": 0.5
+          },
+          "y": {
+            "field": {
+              "group": "height"
+            },
+            "mult": 0.5
+          },
+          "radius": {
+            "scale": "pic1_scale1",
+            "field": "FTE",
+            "offset": 160
+          },
+          "theta": {
+            "signal": "(datum.startAngle + datum.endAngle)/2"
+          },
+          "align": {
+            "value": "center"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "fontSize": {
+            "value": 12
+          },
+          "text": {
+            "signal": "format(datum.PERCENTAGE, '.0%')"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {
+        "data": "table"
+      },
+      "encode": {
+        "update": {
+          "x": {
+            "field": {
+              "group": "width"
+            },
+            "mult": 0.5
+          },
+          "y": {
+            "field": {
+              "group": "height"
+            },
+            "mult": 0.5
+          },
+          "radius": {
+            "scale": "pic1_scale1",
+            "field": "FTE",
+            "offset": 185
+          },
+          "theta": {
+            "signal": "(datum.startAngle + datum.endAngle)/2"
+          },
+          "align": {
+            "value": "center"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "fontSize": {
+            "value": 12
+          },
+          "text": {
+            "field": "RD_TRANSVERSAL"
+          }
+        }
+      }
+    }
+  ]
+},
+{
+  "type": "group",
+  "name": "concat_1_group",
+  "title": {
+    "text": "Internal FTEs ditribution of R&D projects",
+    "frame": "group"
+  },
+  "encode": {
+    "update": {
+      "width": {
+        "signal": "width"
+      },
+      "height": {
+        "signal": "height"
+      }
+    }
+  },
+  "scales": [
+    {
+      "name": "pic2_scale1",
+      "type": "sqrt",
+      "domain": {
+        "data": "table2",
+        "field": "total"
+      },
+      "zero": true
+    },
+    {
+      "name": "color",
+      "type": "ordinal",
+      "domain": {
+        "data": "table2",
+        "field": "Category",
+        "sort": {
+          "op": "mean",
+          "field": "total",
+          "order": "descending"
+        }
+      },
+      "range": [
+        "#5a413e",
+        "#c1542e",
+        "#c9b8a2",
+        "#cd9e3c",
+        "#ede8bd",
+        "#676687",
+        "#a3291e",
+        "#bd985a",
+        "#2e2b2d",
+        "#87784a",
+        "#c9b8a2"
+      ]
+    }
+  ],
+  "marks": [
+    {
+      "type": "arc",
+      "from": {
+        "data": "table2"
+      },
+      "encode": {
+        "enter": {
+          "tooltip": {
+            "signal": "{title:datum.Category,'FTE':format(datum.total,'.0f')}"
+          },
+          "fill": {
+            "scale": "color",
+            "field": "Category"
+          }
+        },
+        "update": {
+          "x": {
+            "field": {
+              "group": "width"
+            },
+            "mult": 0.5
+          },
+          "y": {
+            "field": {
+              "group": "height"
+            },
+            "mult": 0.5
+          },
+          "startAngle": {
+            "field": "startAngle"
+          },
+          "endAngle": {
+            "field": "endAngle"
+          },
+          "innerRadius": {
+            "value": 140
+          },
+          "outerRadius": {
+            "scale": "pic2_scale1",
+            "field": "total"
+          },
+          "fillOpacity": {
+            "value": 1
+          },
+          "padAngle": {
+            "value": 0
+          }
+        },
+        "hover": {
+          "padAngle": {
+            "value": 0.04
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {
+        "data": "table2"
+      },
+      "encode": {
+        "update": {
+          "x": {
+            "field": {
+              "group": "width"
+            },
+            "mult": 0.5
+          },
+          "y": {
+            "field": {
+              "group": "height"
+            },
+            "mult": 0.5
+          },
+          "radius": {
+            "scale": "pic2_scale1",
+            "field": "total",
+            "offset": 160
+          },
+          "theta": {
+            "signal": "(datum.startAngle + datum.endAngle)/2"
+          },
+          "fill": {
+            "value": "#000"
+          },
+          "align": {
+            "value": "center"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "fontSize": {
+            "value": 10
+          },
+          "text": {
+            "field": "Category"
+          }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "from": {
+        "data": "table2"
+      },
+      "encode": {
+        "update": {
+          "x": {
+            "field": {
+              "group": "width"
+            },
+            "mult": 0.5
+          },
+          "y": {
+            "field": {
+              "group": "height"
+            },
+            "mult": 0.5
+          },
+          "radius": {
+            "scale": "pic2_scale1",
+            "field": "total",
+            "offset": 100
+          },
+          "theta": {
+            "signal": "(datum.startAngle + datum.endAngle)/2"
+          },
+          "fill": {
+            "value": "#fffff1"
+          },
+          "align": {
+            "value": "center"
+          },
+          "baseline": {
+            "value": "middle"
+          },
+          "fontSize": {
+            "value": 10
+          },
+          "text": {
+            "signal": "format(datum.percent,'.0%')"
+          }
+        }
+      }
+    }
+  ]
+}
+],
+"scales": [],
+"config": {
+"axisY": {
+  "minExtent": 30
+}
+}
+}
