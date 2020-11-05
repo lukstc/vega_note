@@ -1,0 +1,106 @@
+
+
+  var render_id = "render_5e5dd5256fd61a0008265edf";
+  var ag_instance_5e5dd5256fd61a0008265edf = null;
+
+
+
+
+
+
+	var src_url_0 ="https:\/\/divapilot.sanofi.com\/athena\/api\/data_source\/5e5dc3f08715e700080fd4e7\/read.json?BASELINE=May\x2b20\x26FY=1H2020\x26RD_TRANSVERSAL_FILTER=Non\x2bR%26D"
+	var src_url_0_snap =null
+
+
+	var src_url_5e5dd5256fd61a0008265edf_0 ="https:\/\/divapilot.sanofi.com\/athena\/api\/data_source\/5e5dc3f08715e700080fd4e7\/read.json?BASELINE=May\x2b20\x26FY=1H2020\x26RD_TRANSVERSAL_FILTER=Non\x2bR%26D"
+	var src_url_5e5dd5256fd61a0008265edf_0_snap =null
+
+
+
+
+
+
+	var src_url_length =  1
+
+	var src_url_5e5dd5256fd61a0008265edf_length =  1
+
+
+
+
+	var src_url_1 ="https:\/\/divapilot.sanofi.com\/athena\/api\/data_source\/5e5dc9bc8715e700080fd4ec\/read.json?BASELINE=May\x2b20\x26FY=1H2020\x26RD_TRANSVERSAL_FILTER=Non\x2bR%26D"
+	var src_url_1_snap =null
+
+
+	var src_url_5e5dd5256fd61a0008265edf_1 ="https:\/\/divapilot.sanofi.com\/athena\/api\/data_source\/5e5dc9bc8715e700080fd4ec\/read.json?BASELINE=May\x2b20\x26FY=1H2020\x26RD_TRANSVERSAL_FILTER=Non\x2bR%26D"
+	var src_url_5e5dd5256fd61a0008265edf_1_snap =null
+
+
+
+
+
+
+	var src_url_length =  2
+
+	var src_url_5e5dd5256fd61a0008265edf_length =  2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	function getCurrentRenderEle(scriptEle) {
+		if (!scriptEle || !scriptEle.parentElement || scriptEle.parentElement.childElementCount < 2) {
+			console.error('Invalid script element.');
+			return;
+		}
+
+		return Array.from(scriptEle.parentElement.children).find(item=> {
+			if(item && (item instanceof HTMLElement) && item.id && item.id.indexOf('render_') >=0) return item;
+		});
+	}
+
+	function getCurrentRenderId(scriptEle) {
+	  const currentRender = getCurrentRenderEle(scriptEle);
+	  if (!currentRender || !currentRender.id) {
+		  console.error('Invalid render');
+		  return;
+	  }
+
+	  return currentRender.id;
+	}
+
+  function getCurrentAgInstance(scriptEle) {
+	  const currentRender = getCurrentRenderEle(scriptEle);
+	  if (!currentRender || !currentRender.id) {
+		  console.error('Invalid render');
+		  return;
+	  }
+
+	  const tempArr = currentRender.id.split('_');
+	  if (tempArr.length < 2) return null;
+
+	  return window[`ag_instance_${tempArr[1]}`];
+  }
