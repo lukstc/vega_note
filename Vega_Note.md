@@ -24,11 +24,13 @@
 
 ## Specification
 
+- "$schema": 似乎没有什么实际作用，删除后似乎对viz显示没有什么影响？【的确没有什么影响，可以删掉】
+
 ## Config
 
-## Singal
+## Signal
 
-- singal作为动态变量（dynamic variables that parameterize a visualization and can drive interactive behaviors）
+- signal作为动态变量（dynamic variables that parameterize a visualization and can drive interactive behaviors）
 - Event Stream驱动singal变化
 - events will be evaluated according to their specifiaction order
 - event激活singal更新，进一步推动全局引用了此singal的变量更新，最后view重新render
@@ -53,8 +55,22 @@
 	    - groupby - Field | Field [] - 【如果是data-driven facets，Required】指定用哪一个字段来分割数据
 	    - aggregate - Object -【for data-driven facets, 声明对每一个facet的aggregate方法】
 
-	### Group的使用
-	- 核心概念是将可视化中不同的元素组成一个集合，方便对整体进行管理分配
+### Group的使用
+
+- 核心概念是将可视化中不同的元素组成一个集合，方便对整体进行管理分配
+- group内部可以再分配group内部引用的scale等等
+- 在top level可以用layout对图形的排布进行管理
+
+### Faceting
+
+- ```facet``` 用于split数据并且分配给group mark内各个子items
+- 注意参考doc和例子：grouped bar chart
+- Property:
+  - ```name```
+  - ```data```
+  - ```field```
+  - ```groupby```
+  - ```aggregate```
 
 ## Scale
 
@@ -113,9 +129,42 @@
 
 ## Memo & Tips
 
-- 注意拼写signal
+### Signal
+
+- 注意拼写signal (~~singal~~)
+
+- Signal 的应用范围，比如:
+
+  - ```json
+    "signals": {
+            "name": "data_changer",
+            "on": [
+              {
+                "events": "arc:click",
+                "update": "datum"
+              }
+            ],
+            "push": "outer"
+          },
+    ```
+
+  - 如果这个这个绘图里面有两个arc的图，点击两个arc都会有反应
+
+  - 如果希望点击一个arc对另一个arc产生影响【solutions】
+
+    - 【solution#1】
+      - Nested Signals + group：把signals和想绑定的mark放置在一个group内，group内signal只会对group内mark动作监听，
+      - group外设置同名字的signal，内部signal push to outer
+      - 参见[signal doc - Nested Signals](https://vega.github.io/vega/docs/signals/)
+    - 【solution#2】
+      - **把signal和mark的名字链接起来【pending语法怎么写来着？】**
+
+- 
+
 - 注意数据内部命名与拼写
+
 - transform对数据的操作，也是层层叠加上去的的，参考[Pi Monte Carlo](https://vega.github.io/vega/examples/pi-monte-carlo/)对数据的transform过程
+
 - 修改数据显示范围```{7,8,9}```做柱状图，显示Y轴[6,10]【轴的显示范围略大于数值范围】【显示效果参考笔记Modified Bar Chart】:
   - 笨办法【hard coding】
     - 修改scale domain Min 为 6
@@ -126,8 +175,11 @@
     - Step#3-Scale-【Multi-Field Data References】```"fields":["R_low","R_high"]```
     - Step#4-Mark选取新的low值-```"y2": {"scale": "yy","field": "R_low"}```
     - Note: 新方法不需要hard coding，不过需要考虑：在对min和max处理之后，处理的值是否在合理范围内【Pending Review】
+  
 - 处理数type：data-format-parameter-parse【参考个人笔记Bar Chart data部分】
+
 - 注意能接收的参数的类型：[官方doc参考](https://vega.github.io/vega/docs/types/#Value)
+
 - [Pi Monte Carlo](https://vega.github.io/vega/examples/pi-monte-carlo/)
   - #285 - map scale时候x map到height，需要reverse：true【个人理解：绘制Axes时候，height上面的量度转投到横轴上时，是从大到小的，所以需要在scale时候reverse？】
   - #78&93&174 ```"width": {"signal": "height"},``` signal由event或者变量驱动interactive，height此处应为固定值，为何如此设置，？
@@ -137,25 +189,20 @@
   - Bind的插件？【Solved】不可以设定控制组件的样式，这部分需要通过前端JS实现
   - #229 ```"text": {"signal": "'Estimate: ' + format(datum.estimate, ',.3f')"}``` 【如何理解此处的signal？】
     - 【Solved】【传递的是可变参数】
--
-
-## 问题和疑问
-
-- "$schema": 似乎没有什么实际作用，删除后似乎对viz显示没有什么影响？
 
 - ```json
   "type":"group",
-        "from":{
-          "facet":{
-            "data":"the_score",
-            "name":"facet",
-            "groupby":"category"
-          }
-        }
+  "from":{
+    "facet":{
+      "data":"the_score",
+      "name":"facet",
+      "groupby":"category"
+    }
+  }
   ```
 
-- 对facet的理解：用于在多个group marks中分割数据【并且分配按照group by之后的数据，分配给各个mark】？
-
+  - 对facet的理解：用于在多个group marks中分割数据【并且分配按照group by之后的数据，分配给各个mark】
+  
 - field - Field - 【如果是pre-facet的data，Required】【改进grouped bar chart的图，使用pre-facet的data】【pending task】
 
 - [Grouped Bar Chart](https://vega.github.io/vega/examples/grouped-bar-chart/) 中
@@ -174,11 +221,7 @@
             ],
       ```
 
-    - 此处的作用？
-
-    - 个人理解是：
-
-      - 此处bandwidth('yscale')返回的值是height的scale上的band宽度【group下每个sub-mark的bandwidth】
+    - 此处bandwidth('yscale')返回的值是height的scale上的band宽度【group下每个sub-mark的bandwidth】
 
       - **bandwidth**(*name*[, *group*]): Returns the current band width for the named band scale transform, or zero if the scale is not found or is not a band scale. The optional *group* argument takes a scenegraph group mark item to indicate the specific scope in which to look up the scale.
 
@@ -233,7 +276,10 @@
 
     - 为啥from data bars
 
-    - 为啥x field 用x2
+    - 为啥x field 用x2: x2是从原图中引申出来的，引用了原图的x2，此处的x2和用户定义的x2不是一个
+
+
+## 问题和疑问
 
 - [Line Chart]()
 
