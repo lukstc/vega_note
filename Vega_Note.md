@@ -31,10 +31,61 @@
 ## Signal
 
 - signal作为动态变量（dynamic variables that parameterize a visualization and can drive interactive behaviors）
+
 - Event Stream驱动singal变化
+
 - events will be evaluated according to their specifiaction order
+
 - event激活singal更新，进一步推动全局引用了此singal的变量更新，最后view重新render
+
 - Singal name需要为有效的JS ID，且不能为预留过的名字
+
+- 将signal和event进行绑定时候（e.g. 点击某个mark，更新显示相关数据内容）注意mark和signal的联系
+
+  - 例子：如果一个图中有两个pie charts，点击左边扇叶更新右侧chart的图数据。
+
+  - 【方案1】：两个chart分别放在两个group中，group内部外部定义一个同名字的signal，group内部signal和event绑定之后，push to outer，另一个group能够读取group 外部的signal信号传入
+
+  - 【方案2】：将signal和mark绑定，此处需要声明mark的名字
+
+    - ```json
+      "signals": [
+        {
+          "name": "tooltip",
+          "value": {},
+          "on": [
+            {"events": "rect:mouseover", "update": "datum"},
+            {"events": "rect:mouseout",  "update": "{}"}
+          ]
+        }
+      ]
+      =======================
+      "signals": [
+        {
+          "name": "tooltip",
+          "value": {},
+          "on": [
+            {"events": "@[Your_Mark_Name]:mouseover", "update": "datum"},
+            {"events": "@[Your_Mark_Name]:mouseout",  "update": "{}"}
+          ]
+        }
+      ]
+      ====== e.g. ==========
+{
+        "name": "data_changer",
+        "value": {
+          "RD_TRANSVERSAL": "R&D"
+        },
+        "on":[
+          {
+            "events":"@overview:click",
+            "update":"datum"
+          }
+        ]
+      }
+      ```
+      
+    - 
 
 ## Mark
 
