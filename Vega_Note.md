@@ -329,6 +329,31 @@
 
     - 为啥x field 用x2: x2是从原图中引申出来的，引用了原图的x2，此处的x2和用户定义的x2不是一个
 
+### Size 自适应
+
+- 宽度自适应【pending】
+
+```json
+"width": "containerSize()[0]",
+"autosize": {type: 'fit', resize: true},
+"signals": [
+    {
+        "name": "width",
+        "update": "containerSize()[0]",
+        "on": [{
+                "events": {"source": "#toggle-bnt", "type": "click"},
+                "update": "containerSize()[0]"
+        },
+            {
+            "events": {"source": "window", "type": "resize"},
+                "update": "containerSize()[0]"
+        }]
+    }
+],
+```
+
+
+
 
 ## 问题和疑问
 
